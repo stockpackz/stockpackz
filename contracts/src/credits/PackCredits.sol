@@ -19,6 +19,7 @@ contract PackCredits is IPackCredits, AccessControl, ReentrancyGuard {
 
     bytes32 public constant SPENDER_ROLE = keccak256("SPENDER_ROLE"); // StockPackz core
     bytes32 public constant FUNDER_ROLE = keccak256("FUNDER_ROLE"); // rewards vault converter, admin
+    bytes32 public constant GRANTER_ROLE = keccak256("GRANTER_ROLE"); // collection badges, promos
 
     uint256 public constant EPOCH_LENGTH = 1 weeks;
 
@@ -44,6 +45,7 @@ contract PackCredits is IPackCredits, AccessControl, ReentrancyGuard {
     event CreditsFunded(address indexed from, uint256 amount, uint256 totalBacking);
     event CreditsClaimed(address indexed user, uint256 indexed epoch, uint256 amount);
     event CreditsSpent(address indexed user, address indexed spender, uint256 amount);
+    event CreditsGranted(address indexed user, address indexed granter, uint256 amount);
     event TiersUpdated(uint256 count);
 
     error NothingClaimable();
@@ -116,6 +118,22 @@ contract PackCredits is IPackCredits, AccessControl, ReentrancyGuard {
         totalCreditLiabilities += amount;
 
         emit CreditsClaimed(msg.sender, epoch, amount);
+    }
+
+    /// @notice Grant `amount` of credits to `user`, fully backed by USDG
+    ///         pulled from the caller in the same transaction. Used for
+    ///         collection-completion rewards and promotions — a granted
+    ///         credit is never an unfunded promise.
+    function grantFor(address user, uint256 amount) external onlyRole(GRANTER_ROLE) nonReentrant {
+        uint256 beforeBal = usdg.balanceOf(address(this));
+        usdg.safeTransferFrom(msg.sender, address(this), amount);
+        if (usdg.balanceOf(address(this)) - beforeBal != amount) revert FeeOnTransferNotSupported();
+
+        totalBacking += amount;
+        totalCreditLiabilities += amount;
+        _credits[user] += amount;
+
+        emit CreditsGranted(user, msg.sender, amount);
     }
 
     // ------------------------------------------------------------- spending

@@ -6,7 +6,9 @@ import {StockPackz} from "../src/StockPackz.sol";
 import {PackCredits} from "../src/credits/PackCredits.sol";
 import {StockPackzToken} from "../src/token/StockPackzToken.sol";
 import {TaxVaultConverter} from "../src/vaults/TaxVaultConverter.sol";
-import {CollectionBadges} from "../src/badges/CollectionBadges.sol";
+import {CollectionBadges, IPackCreditsGranter} from "../src/badges/CollectionBadges.sol";
+import {PackRewardsVault} from "../src/vaults/PackRewardsVault.sol";
+import {IPackRewardsVault} from "../src/interfaces/IPackRewardsVault.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IPackCredits} from "../src/interfaces/IPackCredits.sol";
 import {IStockSwapAdapter} from "../src/interfaces/IStockSwapAdapter.sol";
@@ -241,7 +243,66 @@ contract CreditsTokenBadgesTest is BaseTest {
         mins[1] = 1e18;
         mins[2] = 1e18;
         vm.prank(admin);
-        collectionId = badges.createCollection("Magnificent Seven", "Own them all", "ipfs://mag7", tokens, mins);
+        collectionId = badges.createCollection("Magnificent Seven", "Own them all", "ipfs://mag7", tokens, mins, 10e6, 10e6);
+    }
+
+    function _completeMag7(address user) internal {
+        nvda.mint(user, 1e18);
+        msft.mint(user, 1e18);
+        googl.mint(user, 1e18);
+    }
+
+    function _wireRewardModules() internal returns (PackRewardsVault vault) {
+        vault = new PackRewardsVault(IERC20(address(usdg)), admin);
+        vm.startPrank(admin);
+        badges.setRewardModules(
+            IERC20(address(usdg)), IPackRewardsVault(address(vault)), IPackCreditsGranter(address(credits))
+        );
+        credits.grantRole(credits.GRANTER_ROLE(), address(badges));
+        vault.grantRole(vault.SPENDER_ROLE(), address(badges));
+        vm.stopPrank();
+    }
+
+    function test_badge_completionRewardGrantsBackedCredits() public {
+        uint256 id = _createMag7();
+        PackRewardsVault vault = _wireRewardModules();
+
+        usdg.mint(admin, 100e6);
+        vm.startPrank(admin);
+        usdg.approve(address(vault), 100e6);
+        vault.fundVault(100e6);
+        vm.stopPrank();
+
+        uint256 creditsBefore = usdg.balanceOf(address(credits));
+        _completeMag7(alice);
+        vm.prank(alice);
+        badges.claimBadge(id);
+
+        // 10 bonus stock + 10 free pack = 20 USDG of fully backed credits.
+        assertEq(credits.creditBalance(alice), 20e6);
+        assertEq(usdg.balanceOf(address(credits)) - creditsBefore, 20e6);
+        assertEq(vault.availableFunds(), 80e6);
+    }
+
+    function test_badge_rewardSkippedWhenVaultEmpty_badgeStillMints() public {
+        uint256 id = _createMag7();
+        _wireRewardModules(); // vault deployed but never funded
+
+        _completeMag7(alice);
+        vm.prank(alice);
+        uint256 badgeId = badges.claimBadge(id);
+
+        assertEq(badges.ownerOf(badgeId), alice);
+        assertEq(credits.creditBalance(alice), 0);
+    }
+
+    function test_badge_rewardSkippedWhenModulesUnset() public {
+        uint256 id = _createMag7();
+        _completeMag7(alice);
+        vm.prank(alice);
+        uint256 badgeId = badges.claimBadge(id);
+        assertEq(badges.ownerOf(badgeId), alice);
+        assertEq(credits.creditBalance(alice), 0);
     }
 
     function test_badge_claimRequiresAllBalances() public {
