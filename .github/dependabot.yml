@@ -1,0 +1,31 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    open-pull-requests-limit: 5
+    labels: ["dependencies"]
+
+  - package-ecosystem: npm
+    directory: "/sdk"
+    schedule:
+      interval: weekly
+      day: monday
+    labels: ["dependencies", "sdk"]
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    labels: ["dependencies", "ci"]
+
+  - package-ecosystem: gitsubmodule
+    directory: "/contracts"
+    schedule:
+      interval: monthly
+    labels: ["dependencies", "contracts"]

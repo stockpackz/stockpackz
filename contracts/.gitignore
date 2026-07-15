@@ -1,0 +1,7 @@
+# Foundry
+cache/
+out/
+broadcast/
+
+# Dependencies are reinstalled by CI (forge install)
+lib/

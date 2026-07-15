@@ -1,0 +1,29 @@
+name: Security report (non-sensitive)
+description: Hardening suggestions and non-exploitable findings only
+title: "security: "
+labels: ["security", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ⚠️ **Stop if this is exploitable.** Vulnerabilities must go through
+        [private vulnerability reporting](../../security/advisories/new) — see [SECURITY.md](../../blob/main/SECURITY.md).
+        This template is only for non-sensitive hardening suggestions, documentation gaps, or defense-in-depth ideas.
+  - type: checkboxes
+    id: confirm
+    attributes:
+      label: Confirmation
+      options:
+        - label: This is NOT an exploitable vulnerability; I have read SECURITY.md
+          required: true
+  - type: textarea
+    id: finding
+    attributes:
+      label: Finding
+      description: The hardening opportunity or concern.
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested improvement

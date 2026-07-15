@@ -1,0 +1,26 @@
+title: "[Idea] "
+labels: ["idea"]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What should StockPackz do, and who benefits?
+    validations:
+      required: true
+  - type: textarea
+    id: economics
+    attributes:
+      label: Economics (if applicable)
+      description: |
+        How is it funded? Remember the protocol rules: no unfunded promises,
+        no odds changes based on holdings, the 9 USDG stock leg is untouchable.
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Roadmap fit
+      options:
+        - Phase 2 — Progression
+        - Phase 3 — Platform
+        - Phase 4 — Community
+        - New phase

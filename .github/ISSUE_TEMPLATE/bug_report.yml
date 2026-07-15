@@ -1,0 +1,49 @@
+name: Bug report
+description: Something isn't working as documented
+title: "bug: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. **If this is a security vulnerability, do not file an issue** — use [private vulnerability reporting](../../security/advisories/new) instead.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Contracts
+        - Frontend
+        - SDK
+        - Docs
+        - CI / tooling
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Minimal steps, code, or a failing test that reproduces the issue.
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: |
+        OS, Node version, Foundry version, browser, network
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or traces
+      render: shell
