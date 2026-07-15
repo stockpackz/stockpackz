@@ -50,6 +50,9 @@ export interface Collection {
   stocks: string[];
   owned: string[];
   badgeEarned: boolean;
+  /** Completion rewards */
+  bonusStockUsd: number;
+  freePacks: number;
 }
 
 export interface RecentPull {

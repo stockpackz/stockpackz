@@ -86,6 +86,8 @@ export const collections: Collection[] = [
     stocks: ["NVDA", "AMD", "INTC", "MU"],
     owned: ["NVDA", "AMD", "INTC"],
     badgeEarned: false,
+    bonusStockUsd: 5,
+    freePacks: 1,
   },
   {
     id: "mag7-collection",
@@ -94,6 +96,8 @@ export const collections: Collection[] = [
     stocks: ["AAPL", "MSFT", "AMZN", "META", "TSLA", "GOOGL", "NVDA"],
     owned: ["AAPL", "MSFT", "NVDA"],
     badgeEarned: false,
+    bonusStockUsd: 10,
+    freePacks: 2,
   },
   {
     id: "dividend-kings",
@@ -102,6 +106,8 @@ export const collections: Collection[] = [
     stocks: ["JNJ", "PG", "KO", "PEP"],
     owned: ["JNJ", "PG", "KO", "PEP"],
     badgeEarned: true,
+    bonusStockUsd: 4,
+    freePacks: 1,
   },
   {
     id: "healthcare",
@@ -110,6 +116,8 @@ export const collections: Collection[] = [
     stocks: ["JNJ", "PG", "PEP"],
     owned: ["JNJ"],
     badgeEarned: false,
+    bonusStockUsd: 3,
+    freePacks: 1,
   },
   {
     id: "future-tech",
@@ -118,6 +126,8 @@ export const collections: Collection[] = [
     stocks: ["NVDA", "AMD", "COIN", "MU"],
     owned: ["NVDA", "AMD"],
     badgeEarned: false,
+    bonusStockUsd: 6,
+    freePacks: 1,
   },
 ];
 

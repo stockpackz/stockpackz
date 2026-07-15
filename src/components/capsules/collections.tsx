@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Award } from "lucide-react";
+import { Award, Gift, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import type { Collection } from "@/lib/types";
 import { BlurFade } from "@/components/ui/blur-fade";
@@ -27,7 +27,7 @@ export function Collections({ collections }: CollectionsProps) {
       <div className="mx-auto max-w-7xl">
         <SectionHeader
           title="Collections"
-          description="Complete a portfolio. Earn your badge."
+          description="Complete a portfolio. Earn your badge, bonus stock, and a free pack."
           className="mb-10"
         />
 
@@ -99,8 +99,34 @@ export function Collections({ collections }: CollectionsProps) {
                       })}
                     </div>
 
+                    {/* Completion rewards */}
+                    <div className="mt-6 flex flex-wrap items-center gap-2">
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ring-1 ${
+                          collection.badgeEarned
+                            ? "bg-rh-green/10 text-rh-green ring-rh-green/25"
+                            : "bg-white/[0.04] text-white/45 ring-white/[0.07]"
+                        }`}
+                      >
+                        <TrendingUp className="h-3 w-3" strokeWidth={2} />+$
+                        {collection.bonusStockUsd} bonus stock
+                      </span>
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium ring-1 ${
+                          collection.badgeEarned
+                            ? "bg-rh-green/10 text-rh-green ring-rh-green/25"
+                            : "bg-white/[0.04] text-white/45 ring-white/[0.07]"
+                        }`}
+                      >
+                        <Gift className="h-3 w-3" strokeWidth={2} />
+                        {collection.freePacks === 1
+                          ? "1 free pack"
+                          : `${collection.freePacks} free packs`}
+                      </span>
+                    </div>
+
                     {/* Footer: completion + badge preview */}
-                    <div className="mt-8 flex items-center justify-between">
+                    <div className="mt-6 flex items-center justify-between">
                       <div>
                         <p className="text-2xl font-bold tabular-nums tracking-tight text-white">
                           {progress}%

@@ -2,7 +2,8 @@
  * Read collection progress for a wallet.
  *
  * Completion is computed from live token balances — no locking or burning.
- * Completed collections can claim a soulbound badge on-chain.
+ * Completed collections claim a soulbound badge, a bonus stock allocation
+ * funded by the Pack Rewards Vault, and a free pack credit.
  */
 import { StockPackzClient, NotDeployedError } from "@stockpackz/sdk";
 
