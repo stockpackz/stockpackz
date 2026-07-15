@@ -23,9 +23,3 @@ updates:
     schedule:
       interval: weekly
     labels: ["dependencies", "ci"]
-
-  - package-ecosystem: gitsubmodule
-    directory: "/contracts"
-    schedule:
-      interval: monthly
-    labels: ["dependencies", "contracts"]
