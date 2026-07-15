@@ -1,5 +1,8 @@
 "use client"
 
+// Vendored from Magic UI; animation randomness is intentionally impure.
+/* eslint-disable react-hooks/purity */
+
 import React, { useEffect, useId, useRef, useState } from "react"
 import { motion } from "motion/react"
 

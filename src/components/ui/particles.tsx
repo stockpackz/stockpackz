@@ -1,5 +1,8 @@
 "use client"
 
+// Vendored from Magic UI; render-time ref updates keep rAF callbacks fresh.
+/* eslint-disable react-hooks/refs */
+
 import React, {
   useEffect,
   useRef,

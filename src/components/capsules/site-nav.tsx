@@ -18,7 +18,8 @@ const LINKS = [
 export function SiteNav() {
   const pathname = usePathname();
   const routeTab = pathname?.startsWith("/docs") ? "docs" : pathname?.startsWith("/token") ? "token" : null;
-  const [active, setActive] = useState<string | null>(routeTab);
+  const [sectionActive, setSectionActive] = useState<string | null>(null);
+  const active = routeTab ?? sectionActive;
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -27,7 +28,6 @@ export function SiteNav() {
     window.addEventListener("scroll", onScroll, { passive: true });
 
     if (routeTab) {
-      setActive(routeTab);
       return () => window.removeEventListener("scroll", onScroll);
     }
 
@@ -38,7 +38,7 @@ export function SiteNav() {
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) setActive(entry.target.id);
+          if (entry.isIntersecting) setSectionActive(entry.target.id);
         }
       },
       { rootMargin: "-30% 0px -60% 0px" }

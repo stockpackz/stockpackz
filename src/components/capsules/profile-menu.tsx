@@ -35,6 +35,9 @@ export function ProfileMenu({ address, onDisconnect }: ProfileMenuProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    // Hydration-safe localStorage read: must happen after mount, and the
+    // stored name is not renderable on the server.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setName(localStorage.getItem(storageKey(address)) ?? "");
   }, [address]);
 

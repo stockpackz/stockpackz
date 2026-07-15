@@ -187,6 +187,9 @@ export function OpenCapsuleFlow({
   );
 
   useEffect(() => {
+    // Phase transitions are driven by modal open/close and wallet readiness;
+    // the state machine must react synchronously to these external inputs.
+    /* eslint-disable react-hooks/set-state-in-effect */
     if (!isOpen) {
       reset();
       return;
@@ -200,6 +203,7 @@ export function OpenCapsuleFlow({
     } else {
       setPhase("selecting");
     }
+    /* eslint-enable react-hooks/set-state-in-effect */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, walletReady]);
 

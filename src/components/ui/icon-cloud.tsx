@@ -1,5 +1,8 @@
 "use client"
 
+// Vendored from Magic UI; canvas layout is recomputed in effects by design.
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import React, { useEffect, useRef, useState } from "react"
 import { renderToString } from "react-dom/server"
 
