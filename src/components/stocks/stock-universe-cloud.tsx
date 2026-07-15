@@ -13,7 +13,7 @@ export function StockUniverseCloud() {
       <div className="mx-auto max-w-7xl">
         <div className="grid items-center gap-16 lg:grid-cols-2">
           <SectionHeader
-            title="142 Companies. One Chain."
+            title="18 Companies. One Chain."
             description="Drag the cloud. Every logo is a real tokenized stock you can pull from a StockPack."
           />
 

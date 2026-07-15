@@ -11,32 +11,23 @@ function formatJackpot(value: number): string {
 }
 
 export function Jackpot() {
-  const [value, setValue] = useState(184_262.31);
+  const [value, setValue] = useState(500);
 
   useEffect(() => {
-    let growthPerSec = 0.12;
-
     async function sync() {
       try {
         const res = await fetch("/api/jackpot");
         if (!res.ok) return;
-        const data = (await res.json()) as { valueUsd: number; growthPerSec: number };
-        growthPerSec = data.growthPerSec;
+        const data = (await res.json()) as { valueUsd: number };
         setValue(data.valueUsd);
       } catch {
-        /* keep local ticking on network failure */
+        /* keep last value on network failure */
       }
     }
 
     void sync();
     const resync = setInterval(sync, 15_000);
-    const tick = setInterval(() => {
-      setValue((v) => v + growthPerSec * 1.2);
-    }, 1200);
-    return () => {
-      clearInterval(resync);
-      clearInterval(tick);
-    };
+    return () => clearInterval(resync);
   }, []);
 
   return (
@@ -68,7 +59,9 @@ export function Jackpot() {
             Every StockPack contributes to a shared jackpot vault. One lucky opening wins the
             vault.
           </p>
-          <p className="mt-2 text-sm text-white/25">The vault never stops growing.</p>
+          <p className="mt-2 text-sm text-white/25">
+            Seeded at $500. Every pack opened makes it grow.
+          </p>
         </BlurFade>
 
         {/* Vault visualization */}

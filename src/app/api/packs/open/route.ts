@@ -34,10 +34,10 @@ export async function POST(request: Request) {
   // Independent jackpot roll from the "same request" (mock).
   const jackpotRoll = Math.floor(Math.random() * JACKPOT_ODDS.denominator);
   const jackpotWon = jackpotRoll < JACKPOT_ODDS.threshold;
-  // Mocked current vault size for payout display; on-chain this is the
+  // Seeded vault size for payout display; on-chain this is the
   // vault balance after the current contribution.
   const jackpotPayout = jackpotWon
-    ? Math.round(184_000 * (JACKPOT_ODDS.winnerShareBps / 10_000))
+    ? Math.round(500 * (JACKPOT_ODDS.winnerShareBps / 10_000))
     : 0;
 
   const executionPrice =

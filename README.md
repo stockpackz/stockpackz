@@ -152,6 +152,10 @@ The protocol is **pre-audit**. Do not deploy to mainnet with real funds.
 
 Full details in [ROADMAP.md](ROADMAP.md).
 
+## Community
+
+Follow [@stockpackz on X](https://x.com/stockpackz) for launch updates, pack drops, and jackpot announcements.
+
 ## Contributing
 
 Contributions are welcome — read [CONTRIBUTING.md](CONTRIBUTING.md) for setup, coding standards, and the PR checklist. All participants are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).

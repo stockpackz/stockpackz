@@ -13,7 +13,6 @@ import { OpenCapsuleFlow } from "@/components/capsules/open-capsule-flow";
 import { Statistics } from "@/components/capsules/statistics";
 import { Jackpot } from "@/components/capsules/jackpot";
 import { Transparency } from "@/components/capsules/transparency";
-import { RecentlyCollected } from "@/components/capsules/recently-collected";
 import { Collections } from "@/components/capsules/collections";
 import { FinalCta } from "@/components/capsules/final-cta";
 import { PageBackground } from "@/components/capsules/page-background";
@@ -63,7 +62,6 @@ export default function StockpackzPage() {
         <Transparency />
         <Statistics />
         <Collections collections={collections} />
-        <RecentlyCollected />
         <FinalCta onOpen={handleOpenCapsule} walletReady={walletReady} />
       </div>
 
@@ -82,7 +80,25 @@ export default function StockpackzPage() {
               Built on Robinhood Chain ·{" "}
               <Link href="/docs" className="text-white/40 transition-colors hover:text-white/60">
                 Docs
-              </Link>
+              </Link>{" "}
+              ·{" "}
+              <a
+                href="https://x.com/stockpackz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/40 transition-colors hover:text-white/60"
+              >
+                @stockpackz
+              </a>{" "}
+              ·{" "}
+              <a
+                href="https://github.com/stockpackz/stockpackz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/40 transition-colors hover:text-white/60"
+              >
+                GitHub
+              </a>
             </p>
           </div>
         </div>

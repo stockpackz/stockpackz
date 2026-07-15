@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Trophy, Package, Award } from "lucide-react";
 import type { ActivityEvent } from "@/lib/types";
-import { initialActivityEvents } from "@/lib/mock-data";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { SectionHeader } from "./section-header";
 import { StockLogo } from "./stock-logo";
@@ -53,7 +52,7 @@ function EventIcon({ event }: { event: ActivityEvent }) {
 }
 
 export function LiveOpenings() {
-  const [events, setEvents] = useState<ActivityEvent[]>(initialActivityEvents);
+  const [events, setEvents] = useState<ActivityEvent[]>([]);
 
   useEffect(() => {
     async function poll() {
@@ -86,9 +85,9 @@ export function LiveOpenings() {
           />
           <div className="mt-8 flex gap-10">
             {[
-              { value: "2,481", label: "Opened today" },
-              { value: "38", label: "Sets completed" },
-              { value: "1", label: "Jackpot won" },
+              { value: "$500", label: "Jackpot seed" },
+              { value: "5", label: "Packs live" },
+              { value: "18", label: "Tokenized stocks" },
             ].map((stat) => (
               <div key={stat.label}>
                 <p className="text-2xl font-bold tabular-nums tracking-tight text-white">
@@ -104,7 +103,23 @@ export function LiveOpenings() {
 
         <BlurFade inView>
           <div className="relative">
-            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-[#050505] to-transparent" />
+            {events.length === 0 && (
+              <div className="flex flex-col items-center justify-center rounded-2xl bg-white/[0.03] px-8 py-14 text-center ring-1 ring-white/[0.05]">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute h-full w-full animate-ping rounded-full bg-[#00c805] opacity-50" />
+                  <span className="relative h-2 w-2 rounded-full bg-[#00c805]" />
+                </span>
+                <p className="mt-4 text-[15px] font-medium text-white/70">
+                  Waiting for the first opening
+                </p>
+                <p className="mt-1.5 text-sm text-white/35">
+                  Every pack opened on Robinhood Chain appears here in real time.
+                </p>
+              </div>
+            )}
+            {events.length > 0 && (
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-[#050505] to-transparent" />
+            )}
             <AnimatePresence mode="popLayout" initial={false}>
               {events.slice(0, 5).map((event, i) => {
                 const copy = eventCopy(event);

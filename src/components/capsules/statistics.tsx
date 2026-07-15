@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { BlurFade } from "@/components/ui/blur-fade";
 
 const FACTS = [
-  { icon: Layers, value: "142", label: "Tokenized Stocks", detail: "Real equities as ERC-20 tokens" },
+  { icon: Layers, value: "18", label: "Tokenized Stocks", detail: "Real equities as ERC-20 tokens" },
   { icon: Landmark, value: "Robinhood", label: "Chain", detail: "Purpose-built L2 for real-world assets" },
   { icon: Coins, value: "Uniswap v4", label: "Settlement", detail: "Every pack swaps on-chain liquidity" },
   { icon: Shuffle, value: "Verifiable", label: "Randomness", detail: "Provably fair reveals, on-chain" },

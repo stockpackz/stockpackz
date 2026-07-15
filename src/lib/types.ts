@@ -37,10 +37,6 @@ export interface CapsuleType {
     accent: string;
   };
   rarityPreview: Rarity[];
-  /** Mock: total packs opened globally */
-  globalOpened: number;
-  /** Mock: average collector completion % */
-  completionPercent: number;
 }
 
 export interface Collection {
@@ -53,28 +49,6 @@ export interface Collection {
   /** Completion rewards */
   bonusStockUsd: number;
   freePacks: number;
-}
-
-export interface RecentPull {
-  id: string;
-  user: string;
-  stock: string;
-  ticker: string;
-  tokenAmount?: number;
-  valueUsd?: number;
-  rarity: Rarity;
-  timestamp: Date;
-}
-
-export interface Stats {
-  totalOpened: number;
-  totalValueDistributed: number;
-  uniqueCompanies: number;
-  biggestPullEver: {
-    user: string;
-    stock: string;
-    value: number;
-  };
 }
 
 export type ActivityEventType = "pull" | "collection" | "pack_open" | "jackpot";

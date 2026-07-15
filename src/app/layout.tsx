@@ -29,6 +29,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: "@stockpackz",
+    creator: "@stockpackz",
     title: "StockPackz",
     description: "Open packs. Own tokenized stocks on Robinhood Chain.",
     images: ["/graphics/og-image.png"],

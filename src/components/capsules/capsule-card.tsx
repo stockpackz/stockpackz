@@ -5,7 +5,7 @@ import { useRef, useState } from "react";
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import type { CapsuleType, Rarity } from "@/lib/types";
-import { formatCurrency, formatNumber, cn } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 import { getCapsuleArtwork } from "@/lib/capsule-artwork";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { StockLogo } from "./stock-logo";
@@ -143,17 +143,8 @@ export function CapsuleCard({ capsule, index, onSelect }: CapsuleCardProps) {
             </div>
 
             <div className="mt-4 flex items-center justify-between text-[11px] text-white/35">
-              <span>{capsule.completionPercent}% collected</span>
-              <span>{formatNumber(capsule.globalOpened)} opened</span>
-            </div>
-            <div className="mt-2 h-[2px] w-full overflow-hidden rounded-full bg-white/[0.06]">
-              <motion.div
-                className="h-full rounded-full bg-white/35"
-                initial={{ width: 0 }}
-                whileInView={{ width: `${capsule.completionPercent}%` }}
-                viewport={{ once: true }}
-                transition={{ duration: 1, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
-              />
+              <span>{capsule.assetCount} stocks inside</span>
+              <span>Settles on-chain</span>
             </div>
 
             {/* Explorer */}

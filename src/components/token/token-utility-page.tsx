@@ -22,16 +22,16 @@ import { formatCurrency } from "@/lib/utils";
  * PackPrinter, and the vaults on Robinhood Chain.
  */
 const DEMO = {
-  packzBalance: 12_400,
-  lifetimeXP: 6_320,
-  seasonXP: 1_850,
-  level: 5,
+  packzBalance: 0,
+  lifetimeXP: 0,
+  seasonXP: 0,
+  level: 1,
   prestigeCount: 0,
-  packKeys: 3,
-  nextKeyHours: 7.5,
-  totalBurned: 1_284_502,
-  rewardsVaultUsd: 412_800,
-  jackpotUsd: 184_000,
+  packKeys: 0,
+  nextKeyHours: 0,
+  totalBurned: 0,
+  rewardsVaultUsd: 0,
+  jackpotUsd: 500,
 };
 
 export function TokenUtilityPage() {
