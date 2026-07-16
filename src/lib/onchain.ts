@@ -156,6 +156,21 @@ export async function openPackOnchain(
 
   const price = BigInt(Math.round(capsule.price * 1e6));
 
+  // 0. Check the wallet actually holds enough USDG before prompting anything.
+  const usdgBalance = await readContract(wagmiConfig, {
+    address: USDG_ADDRESS,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: [account],
+  });
+  if (usdgBalance < price) {
+    const have = (Number(usdgBalance) / 1e6).toFixed(2);
+    const need = (Number(price) / 1e6).toFixed(2);
+    throw new OpeningError(
+      `Not enough USDG: this pack costs ${need} USDG but your wallet holds ${have}. Get USDG on Robinhood Chain, then try again.`
+    );
+  }
+
   // 1. Ensure USDG allowance.
   const allowance = await readContract(wagmiConfig, {
     address: USDG_ADDRESS,

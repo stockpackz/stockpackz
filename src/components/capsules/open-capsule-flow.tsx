@@ -183,12 +183,15 @@ export function OpenCapsuleFlow({
           .catch((err: unknown) => {
             // On-chain failure: never fake a result. Surface the state and
             // let the user retry / refund — funds stay safe in the contract.
+            const raw = err instanceof Error ? err.message : "";
             const message =
               err instanceof OpeningError
                 ? err.message
-                : err instanceof Error && err.message.includes("User rejected")
+                : raw.includes("User rejected") || raw.includes("user rejected")
                   ? "Transaction cancelled in wallet."
-                  : "Opening failed before any funds moved. Please try again.";
+                  : raw
+                    ? `Opening failed before any funds moved: ${raw.split("\n")[0].slice(0, 200)}`
+                    : "Opening failed before any funds moved. Please try again.";
             setOpenError(message);
             setPhase("selecting");
           });
