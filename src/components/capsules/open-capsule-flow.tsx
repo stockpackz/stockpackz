@@ -5,8 +5,10 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { ArrowRight, Check, X } from "lucide-react";
+import { useAccount } from "wagmi";
 import type { CapsuleType, PullResult } from "@/lib/types";
 import { pickRandomPull } from "@/lib/mock-data";
+import { isOnchainPack, openPackOnchain, OpeningError } from "@/lib/onchain";
 import { PACK_ECONOMICS, JACKPOT_ODDS, BURN_ECONOMICS, PACK_XP, type SettlementResult } from "@/lib/protocol";
 import { formatCurrency } from "@/lib/utils";
 import { StockLogo } from "./stock-logo";
@@ -87,6 +89,8 @@ export function OpenCapsuleFlow({
   const [activeCapsule, setActiveCapsule] = useState<CapsuleType | null>(null);
   const [result, setResult] = useState<PullResult | null>(null);
   const [settlement, setSettlement] = useState<SettlementResult | null>(null);
+  const [openError, setOpenError] = useState<string | null>(null);
+  const { address } = useAccount();
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const crinkleRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -105,6 +109,7 @@ export function OpenCapsuleFlow({
     setActiveCapsule(null);
     setResult(null);
     setSettlement(null);
+    setOpenError(null);
   }, [clearTimers]);
 
   /** Run the full cinematic timeline for a capsule */
@@ -114,36 +119,42 @@ export function OpenCapsuleFlow({
       setActiveCapsule(capsule);
       setResult(null);
       setSettlement(null);
+      setOpenError(null);
 
-      // The server-side draw is the authority (mirrors the on-chain
-      // verifiable-randomness fulfillment). The reveal is gated on it —
-      // no company is ever shown before the draw resolves.
-      const draw: Promise<SettlementResult> = fetch("/api/packs/open", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packId: capsule.id }),
-      })
-        .then(async (res) => {
-          if (!res.ok) throw new Error("open failed");
-          return (await res.json()) as SettlementResult;
-        })
-        .catch(() => {
-          // Offline/demo fallback: draw locally with the same weights.
-          const pull = pickRandomPull(capsule);
-          return {
-            packId: capsule.id,
-            stock: pull.stock,
-            tokenAmount: pull.tokenAmount,
-            valueUsd: pull.valueUsd,
-            usdgIn: PACK_ECONOMICS.stockAmount,
-            executionPrice: pull.tokenAmount > 0 ? pull.valueUsd / pull.tokenAmount : 0,
-            jackpotContribution: PACK_ECONOMICS.jackpotContribution,
-            jackpotWon: false,
-            jackpotPayout: 0,
-            txHash: "",
-            settledAt: new Date().toISOString(),
-          } satisfies SettlementResult;
-        });
+      // The draw authority, in order of preference:
+      //  1. Real on-chain opening (USDG in, stock delivered to the wallet)
+      //  2. Server-side draw (demo mode when contracts aren't configured)
+      // The reveal is gated on it — no company is ever shown before the
+      // draw resolves.
+      const draw: Promise<SettlementResult> =
+        isOnchainPack(capsule.id) && address
+          ? openPackOnchain(capsule, address)
+          : fetch("/api/packs/open", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ packId: capsule.id }),
+            })
+              .then(async (res) => {
+                if (!res.ok) throw new Error("open failed");
+                return (await res.json()) as SettlementResult;
+              })
+              .catch(() => {
+                // Offline/demo fallback: draw locally with the same weights.
+                const pull = pickRandomPull(capsule);
+                return {
+                  packId: capsule.id,
+                  stock: pull.stock,
+                  tokenAmount: pull.tokenAmount,
+                  valueUsd: pull.valueUsd,
+                  usdgIn: PACK_ECONOMICS.stockAmount,
+                  executionPrice: pull.tokenAmount > 0 ? pull.valueUsd / pull.tokenAmount : 0,
+                  jackpotContribution: PACK_ECONOMICS.jackpotContribution,
+                  jackpotWon: false,
+                  jackpotPayout: 0,
+                  txHash: "",
+                  settledAt: new Date().toISOString(),
+                } satisfies SettlementResult;
+              });
 
       const at = (ms: number, fn: () => void) => {
         timersRef.current.push(setTimeout(fn, ms));
@@ -161,26 +172,39 @@ export function OpenCapsuleFlow({
       });
       // The pack stays sealed until the draw settles — then burst → reveal.
       at(4250, () => {
-        void draw.then((data) => {
-          const pullResult: PullResult = {
-            stock: data.stock,
-            capsule,
-            tokenAmount: data.tokenAmount,
-            valueUsd: data.valueUsd,
-          };
-          setResult(pullResult);
-          setSettlement(data);
-          setPhase("burst");
-          at(1500, () => setPhase("reveal"));
-          at(3850, () => setPhase("swap"));
-          at(4950, () => {
-            setPhase("result");
-            if (data.jackpotWon || pullResult.stock.rarity === "legendary") {
-              fireLegendaryConfetti();
-            }
-            onPullComplete?.(pullResult);
+        draw
+          .then((data) => {
+            const pullResult: PullResult = {
+              stock: data.stock,
+              capsule,
+              tokenAmount: data.tokenAmount,
+              valueUsd: data.valueUsd,
+            };
+            setResult(pullResult);
+            setSettlement(data);
+            setPhase("burst");
+            at(1500, () => setPhase("reveal"));
+            at(3850, () => setPhase("swap"));
+            at(4950, () => {
+              setPhase("result");
+              if (data.jackpotWon || pullResult.stock.rarity === "legendary") {
+                fireLegendaryConfetti();
+              }
+              onPullComplete?.(pullResult);
+            });
+          })
+          .catch((err: unknown) => {
+            // On-chain failure: never fake a result. Surface the state and
+            // let the user retry / refund — funds stay safe in the contract.
+            const message =
+              err instanceof OpeningError
+                ? err.message
+                : err instanceof Error && err.message.includes("User rejected")
+                  ? "Transaction cancelled in wallet."
+                  : "Opening failed before any funds moved. Please try again.";
+            setOpenError(message);
+            setPhase("selecting");
           });
-        });
       });
     },
     [clearTimers, onPullComplete]
@@ -288,6 +312,11 @@ export function OpenCapsuleFlow({
               <p className="mt-1.5 text-center text-sm text-white/40">
                 Pick which StockPack to open
               </p>
+              {openError && (
+                <p className="mx-auto mt-3 max-w-sm rounded-2xl bg-red-500/[0.08] px-4 py-2.5 text-center text-[12px] leading-relaxed text-red-300/90 ring-1 ring-red-500/[0.15]">
+                  {openError}
+                </p>
+              )}
               <p className="mt-3 text-center text-[11px] leading-relaxed text-white/30">
                 Every {formatCurrency(PACK_ECONOMICS.price)} pack: {formatCurrency(PACK_ECONOMICS.stockAmount)} buys
                 your stock · {formatCurrency(PACK_ECONOMICS.protocolFee)} protocol ·{" "}
