@@ -15,8 +15,8 @@ StockPackz is **live on Robinhood Chain mainnet** (chain ID 4663). This document
 | Live Openings feed | ✅ Live — indexed from `StockPurchased` / `JackpotWon` events |
 | Jackpot counter | ✅ Live — `$300` base pot + on-chain vault via `/api/jackpot` |
 | Pay with USDG or ETH/WETH | ✅ Live — auto WETH→USDG via the protocol adapter |
-| User portfolio / collections persistence | ⏳ Pending — collections UI still local; holdings are on-chain ERC-20s |
-| PACKZ holder burn / XP / tiers | ⏳ Pending — token is live on Flap; utility modules not wired yet |
+| User portfolio / collections persistence | ✅ Live — profile reads on-chain stock balances + XPManager |
+| PACKZ holder burn / XP / tiers | ⚡ XP live · burn/tiers still pending (no price adapter) |
 
 ## Live Architecture
 

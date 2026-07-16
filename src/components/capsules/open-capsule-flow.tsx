@@ -7,7 +7,7 @@ import confetti from "canvas-confetti";
 import { ArrowRight, Check, X } from "lucide-react";
 import { useAccount } from "wagmi";
 import type { CapsuleType, PullResult } from "@/lib/types";
-import { isOnchainPack, openPackOnchain, OpeningError } from "@/lib/onchain";
+import { isOnchainPack, openPackOnchain, OpeningError, ONCHAIN_PACK_XP } from "@/lib/onchain";
 import { JACKPOT_ODDS, type SettlementResult } from "@/lib/protocol";
 import { formatCurrency } from "@/lib/utils";
 import { StockLogo } from "./stock-logo";
@@ -733,6 +733,14 @@ export function OpenCapsuleFlow({
                           `${formatCurrency(settlement.executionPrice)} / ${settlement.stock.ticker}`,
                         ],
                         ["Jackpot contribution", formatCurrency(settlement.jackpotContribution)],
+                        ...(isOnchainPack(settlement.packId)
+                          ? ([
+                              [
+                                "XP earned",
+                                `+${ONCHAIN_PACK_XP[settlement.packId] ?? 100} XP`,
+                              ],
+                            ] as [string, string][])
+                          : []),
                       ].map(([label, value]) => (
                         <div key={label} className="flex items-center justify-between">
                           <span className="text-white/35">{label}</span>

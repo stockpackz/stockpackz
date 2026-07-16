@@ -27,8 +27,10 @@ Rewards wallet (Flap creator fees → jackpot top-ups, publicly auditable):
 [`0xaab3d2e25869dd9661e7a886b9a51c02ee6c7777`](https://robinhoodchain.blockscout.com/token/0xaab3d2e25869dd9661e7a886b9a51c02ee6c7777)
 · [Buy on Flap](https://flap.sh/robinhood/0xaab3d2e25869dd9661e7a886b9a51c02ee6c7777)
 
-Note: the Flap-deployed token has no transfer tax hooks; holder burn/discount
-benefits activate after DEX migration, once a PACKZ price source exists.
+**XPManager** (awards XP on settled openings — AI Pack +100, Future Tech +250):
+[`0xA67eeB87552238ea5E7FC976B0C77BB6c066eb78`](https://robinhoodchain.blockscout.com/address/0xA67eeB87552238ea5E7FC976B0C77BB6c066eb78)
+
+Note: holder burn/discount tiers are not wired yet (`membershipTiers` / price adapter still unset). XP awards without requiring PACKZ.
 
 ## 1. Frontend → Vercel + Namecheap DNS
 

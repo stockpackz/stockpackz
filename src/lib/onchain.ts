@@ -28,10 +28,20 @@ export const WETH_ADDRESS = "0x0bd7d308f8e1639fab988df18a8011f41eacad73" as cons
 /** UniswapV4NativeAdapter — permissionless swapExactInput, used to convert WETH → USDG. */
 export const ADAPTER_ADDRESS = "0x0b17df805a8c0921cb1b141f4515612028d8e4a7" as const;
 
+/** XPManager — awards XP on settled openings. */
+export const XP_MANAGER_ADDRESS = (process.env.NEXT_PUBLIC_XP_MANAGER_ADDRESS ??
+  "0xA67eeB87552238ea5E7FC976B0C77BB6c066eb78") as `0x${string}`;
+
 /** Frontend pack id -> on-chain pack id (set by DeployProtocol.s.sol). */
 export const ONCHAIN_PACK_IDS: Record<string, bigint> = {
   ai: 1n,
   "future-tech": 2n,
+};
+
+/** XP awarded per on-chain pack (mirrors pack.baseXP). */
+export const ONCHAIN_PACK_XP: Record<string, number> = {
+  ai: 100,
+  "future-tech": 250,
 };
 
 export function isOnchainPack(capsuleId: string): boolean {

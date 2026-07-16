@@ -2,15 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, ChevronDown, Copy, LogOut, Pencil, Trophy } from "lucide-react";
-import { collections } from "@/lib/mock-data";
+import { Check, ChevronDown, Copy, LogOut, Pencil, Sparkles, Trophy } from "lucide-react";
 import { truncateAddress } from "./wallet-button";
 
 function storageKey(address: string) {
   return `stockpackz:name:${address.toLowerCase()}`;
 }
 
-/** Deterministic accent gradient per wallet address. */
 function avatarGradient(address: string) {
   let hash = 0;
   for (let i = 0; i < address.length; i++) {
@@ -18,6 +16,24 @@ function avatarGradient(address: string) {
   }
   const hue = hash % 360;
   return `linear-gradient(135deg, hsl(${hue} 65% 45%), hsl(${(hue + 60) % 360} 70% 30%))`;
+}
+
+interface ProfileCollection {
+  id: string;
+  name: string;
+  total: number;
+  owned: string[];
+  completed: boolean;
+}
+
+interface ProfileXp {
+  lifetimeXP: number;
+  seasonXP: number;
+  level: number;
+  dailyStreak: number;
+  nextLevel: number;
+  nextLevelXp: number;
+  progressPct: number;
 }
 
 interface ProfileMenuProps {
@@ -31,14 +47,40 @@ export function ProfileMenu({ address, onDisconnect }: ProfileMenuProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState("");
   const [copied, setCopied] = useState(false);
+  const [xp, setXp] = useState<ProfileXp | null>(null);
+  const [cols, setCols] = useState<ProfileCollection[]>([]);
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Hydration-safe localStorage read: must happen after mount, and the
-    // stored name is not renderable on the server.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setName(localStorage.getItem(storageKey(address)) ?? "");
+  }, [address]);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const res = await fetch(`/api/profile?address=${address}`);
+        if (!res.ok) return;
+        const data = (await res.json()) as {
+          xp: ProfileXp;
+          collections: ProfileCollection[];
+        };
+        if (!cancelled) {
+          setXp(data.xp);
+          setCols(data.collections);
+        }
+      } catch {
+        /* keep previous */
+      }
+    }
+    void load();
+    const id = setInterval(load, 20_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
   }, [address]);
 
   useEffect(() => {
@@ -57,7 +99,7 @@ export function ProfileMenu({ address, onDisconnect }: ProfileMenuProps) {
   }, [editing]);
 
   const displayName = name || truncateAddress(address);
-  const completedCount = collections.filter((c) => c.owned.length === c.stocks.length).length;
+  const completedCount = cols.filter((c) => c.completed).length;
 
   function saveName() {
     const trimmed = draft.trim().slice(0, 24);
@@ -76,7 +118,6 @@ export function ProfileMenu({ address, onDisconnect }: ProfileMenuProps) {
 
   return (
     <div ref={rootRef} className="relative">
-      {/* Trigger pill */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -96,7 +137,6 @@ export function ProfileMenu({ address, onDisconnect }: ProfileMenuProps) {
         />
       </button>
 
-      {/* Dropdown */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -106,7 +146,6 @@ export function ProfileMenu({ address, onDisconnect }: ProfileMenuProps) {
             transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
             className="absolute right-0 top-[calc(100%+10px)] z-50 w-[300px] overflow-hidden rounded-2xl bg-[#0b0b0b]/95 shadow-[0_24px_60px_rgba(0,0,0,0.7)] ring-1 ring-white/[0.08] backdrop-blur-2xl"
           >
-            {/* Identity */}
             <div className="border-b border-white/[0.06] p-4">
               <div className="flex items-center gap-3">
                 <span
@@ -169,22 +208,49 @@ export function ProfileMenu({ address, onDisconnect }: ProfileMenuProps) {
                   </button>
                 </div>
               </div>
+
+              {xp && (
+                <div className="mt-3 rounded-xl bg-white/[0.03] px-3 py-2.5 ring-1 ring-white/[0.06]">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-white/35">
+                      <Sparkles className="h-3 w-3 text-[#c4b5fd]" />
+                      Level {xp.level}
+                    </span>
+                    <span className="text-[11px] tabular-nums text-white/50">
+                      {xp.lifetimeXP.toLocaleString()} XP
+                    </span>
+                  </div>
+                  <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/[0.06]">
+                    <div
+                      className="h-full rounded-full bg-[#c4b5fd]/80"
+                      style={{ width: `${xp.progressPct}%` }}
+                    />
+                  </div>
+                  <p className="mt-1.5 text-[10px] text-white/30">
+                    {xp.nextLevelXp - xp.lifetimeXP > 0
+                      ? `${(xp.nextLevelXp - xp.lifetimeXP).toLocaleString()} XP to level ${xp.nextLevel}`
+                      : "Max curve level"}
+                    {xp.dailyStreak > 0 ? ` · ${xp.dailyStreak}d streak` : ""}
+                  </p>
+                </div>
+              )}
             </div>
 
-            {/* Collections */}
             <div className="p-2">
               <div className="flex items-center justify-between px-2 pb-1.5 pt-1">
                 <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/30">
                   Collections
                 </p>
                 <p className="text-[10px] tabular-nums text-white/30">
-                  {completedCount}/{collections.length} complete
+                  {completedCount}/{cols.length || "—"} complete
                 </p>
               </div>
-              <div className="max-h-[260px] space-y-0.5 overflow-y-auto">
-                {collections.map((collection) => {
-                  const complete = collection.owned.length === collection.stocks.length;
-                  const pct = Math.round((collection.owned.length / collection.stocks.length) * 100);
+              <div className="max-h-[220px] space-y-0.5 overflow-y-auto">
+                {cols.length === 0 && (
+                  <p className="px-2.5 py-3 text-[12px] text-white/35">Loading holdings…</p>
+                )}
+                {cols.map((collection) => {
+                  const pct = Math.round((collection.owned.length / Math.max(1, collection.total)) * 100);
                   return (
                     <div
                       key={collection.id}
@@ -195,22 +261,24 @@ export function ProfileMenu({ address, onDisconnect }: ProfileMenuProps) {
                           <p className="truncate text-[13px] font-medium text-white/85">
                             {collection.name}
                           </p>
-                          {complete && <Trophy className="h-3 w-3 shrink-0 text-[#f0d78c]" />}
+                          {collection.completed && (
+                            <Trophy className="h-3 w-3 shrink-0 text-[#f0d78c]" />
+                          )}
                         </div>
                         <span
                           className={`shrink-0 text-[11px] tabular-nums ${
-                            complete ? "font-semibold text-[#4ade80]" : "text-white/35"
+                            collection.completed ? "font-semibold text-[#4ade80]" : "text-white/35"
                           }`}
                         >
-                          {complete
+                          {collection.completed
                             ? "Complete"
-                            : `${collection.owned.length}/${collection.stocks.length}`}
+                            : `${collection.owned.length}/${collection.total}`}
                         </span>
                       </div>
                       <div className="mt-1.5 h-[3px] overflow-hidden rounded-full bg-white/[0.06]">
                         <div
                           className={`h-full rounded-full ${
-                            complete ? "bg-[#00c805]" : "bg-white/25"
+                            collection.completed ? "bg-[#00c805]" : "bg-white/25"
                           }`}
                           style={{ width: `${pct}%` }}
                         />
@@ -221,7 +289,6 @@ export function ProfileMenu({ address, onDisconnect }: ProfileMenuProps) {
               </div>
             </div>
 
-            {/* Disconnect */}
             <div className="border-t border-white/[0.06] p-2">
               <button
                 type="button"

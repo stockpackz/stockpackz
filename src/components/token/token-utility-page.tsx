@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Check, Flame, Key, Lock, Sparkles, Vault } from "lucide-react";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 import { SiteNav } from "@/components/capsules/site-nav";
 import { PageBackground } from "@/components/capsules/page-background";
 import { StockpackzLogo } from "@/components/brand/stockpackz-logo";
@@ -15,42 +15,73 @@ import {
   PACK_ECONOMICS,
   PACK_XP,
 } from "@/lib/protocol";
+import { PACKZ_ADDRESS, PACKZ_FLAP_URL, erc20Abi } from "@/lib/onchain";
 import { formatCurrency } from "@/lib/utils";
 
-/**
- * Demo wallet state — production reads MembershipTierManager, XPManager,
- * PackPrinter, and the vaults on Robinhood Chain.
- */
-const DEMO = {
-  packzBalance: 0,
-  lifetimeXP: 0,
-  seasonXP: 0,
-  level: 1,
-  prestigeCount: 0,
-  packKeys: 0,
-  nextKeyHours: 0,
-  totalBurned: 0,
-  rewardsVaultUsd: 0,
-  jackpotUsd: 300,
-};
-
 export function TokenUtilityPage() {
-  const { isConnected } = useAccount();
+  const { address, isConnected } = useAccount();
   const [hoveredTier, setHoveredTier] = useState<number | null>(null);
+  const [lifetimeXP, setLifetimeXP] = useState(0);
+  const [seasonXP, setSeasonXP] = useState(0);
+  const [level, setLevel] = useState(1);
+  const [jackpotUsd, setJackpotUsd] = useState(300);
+
+  const { data: packzRaw } = useReadContract({
+    address: PACKZ_ADDRESS,
+    abi: erc20Abi,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: Boolean(address) },
+  });
+  const packzBalance = packzRaw ? Number(packzRaw) / 1e18 : 0;
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      try {
+        const [jackpotRes, profileRes] = await Promise.all([
+          fetch("/api/jackpot"),
+          address ? fetch(`/api/profile?address=${address}`) : Promise.resolve(null),
+        ]);
+        if (jackpotRes.ok) {
+          const j = (await jackpotRes.json()) as { valueUsd: number };
+          if (!cancelled) setJackpotUsd(j.valueUsd);
+        }
+        if (profileRes?.ok) {
+          const p = (await profileRes.json()) as {
+            xp: { lifetimeXP: number; seasonXP: number; level: number };
+          };
+          if (!cancelled) {
+            setLifetimeXP(p.xp.lifetimeXP);
+            setSeasonXP(p.xp.seasonXP);
+            setLevel(p.xp.level);
+          }
+        }
+      } catch {
+        /* keep defaults */
+      }
+    }
+    void load();
+    const id = setInterval(load, 20_000);
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+    };
+  }, [address]);
 
   const currentTier = useMemo(
     () =>
-      [...MEMBERSHIP_TIERS].reverse().find((t) => DEMO.packzBalance >= t.minTokens) ??
+      [...MEMBERSHIP_TIERS].reverse().find((t) => packzBalance >= t.minTokens) ??
       MEMBERSHIP_TIERS[0],
-    []
+    [packzBalance]
   );
-  const nextTier = MEMBERSHIP_TIERS.find((t) => t.minTokens > DEMO.packzBalance) ?? null;
+  const nextTier = MEMBERSHIP_TIERS.find((t) => t.minTokens > packzBalance) ?? null;
 
-  const nextLevel = LEVEL_CURVE.find((l) => l.xp > DEMO.lifetimeXP) ?? LEVEL_CURVE.at(-1)!;
-  const prevLevelXp = [...LEVEL_CURVE].reverse().find((l) => l.xp <= DEMO.lifetimeXP)?.xp ?? 0;
+  const nextLevel = LEVEL_CURVE.find((l) => l.xp > lifetimeXP) ?? LEVEL_CURVE.at(-1)!;
+  const prevLevelXp = [...LEVEL_CURVE].reverse().find((l) => l.xp <= lifetimeXP)?.xp ?? 0;
   const levelProgress = Math.min(
     100,
-    Math.round(((DEMO.lifetimeXP - prevLevelXp) / (nextLevel.xp - prevLevelXp)) * 100)
+    Math.round(((lifetimeXP - prevLevelXp) / Math.max(1, nextLevel.xp - prevLevelXp)) * 100)
   );
 
   return (
@@ -75,7 +106,7 @@ export function TokenUtilityPage() {
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <a
-              href="https://flap.sh/robinhood/0xaab3d2e25869dd9661e7a886b9a51c02ee6c7777"
+              href={PACKZ_FLAP_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex h-11 items-center rounded-full bg-rh-green px-6 text-sm font-semibold text-black transition-transform hover:scale-[1.03]"
@@ -102,20 +133,20 @@ export function TokenUtilityPage() {
               {isConnected ? currentTier.name : "—"}
             </p>
             <p className="mt-1 text-sm tabular-nums text-white/45">
-              {isConnected ? `${DEMO.packzBalance.toLocaleString()} PACKZ` : "Connect to view"}
+              {isConnected ? `${packzBalance.toLocaleString()} PACKZ` : "Connect to view"}
             </p>
             {isConnected && nextTier && (
               <div className="mt-4">
                 <div className="flex justify-between text-[11px] text-white/35">
                   <span>Next: {nextTier.name}</span>
                   <span className="tabular-nums">
-                    {(nextTier.minTokens - DEMO.packzBalance).toLocaleString()} to go
+                    {(nextTier.minTokens - packzBalance).toLocaleString()} to go
                   </span>
                 </div>
                 <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-white/[0.06]">
                   <div
                     className="h-full rounded-full bg-rh-green"
-                    style={{ width: `${Math.min(100, (DEMO.packzBalance / nextTier.minTokens) * 100)}%` }}
+                    style={{ width: `${Math.min(100, (packzBalance / nextTier.minTokens) * 100)}%` }}
                   />
                 </div>
               </div>
@@ -141,17 +172,17 @@ export function TokenUtilityPage() {
             <p className="text-[11px] uppercase tracking-[0.2em] text-white/30">Progression</p>
             <div className="mt-2 flex items-baseline gap-2">
               <p className="text-3xl font-semibold text-white">
-                {isConnected ? `Level ${DEMO.level}` : "—"}
+                {isConnected ? `Level ${level}` : "—"}
               </p>
-              {isConnected && DEMO.prestigeCount > 0 && (
-                <span className="text-xs text-[#f0d78c]">★ Prestige {DEMO.prestigeCount}</span>
+              {isConnected && 0 > 0 && (
+                <span className="text-xs text-[#f0d78c]">★ Prestige {0}</span>
               )}
             </div>
             {isConnected ? (
               <>
                 <div className="mt-3">
                   <div className="flex justify-between text-[11px] text-white/35">
-                    <span className="tabular-nums">{DEMO.lifetimeXP.toLocaleString()} XP lifetime</span>
+                    <span className="tabular-nums">{lifetimeXP.toLocaleString()} XP lifetime</span>
                     <span className="tabular-nums">
                       L{nextLevel.level} at {nextLevel.xp.toLocaleString()}
                     </span>
@@ -163,12 +194,12 @@ export function TokenUtilityPage() {
                 <div className="mt-4 grid grid-cols-2 gap-2 text-center">
                   <div className="rounded-xl bg-white/[0.04] px-2 py-2.5">
                     <p className="text-sm font-semibold tabular-nums text-white">
-                      {DEMO.seasonXP.toLocaleString()}
+                      {seasonXP.toLocaleString()}
                     </p>
                     <p className="mt-0.5 text-[10px] uppercase tracking-wider text-white/30">Season XP</p>
                   </div>
                   <div className="rounded-xl bg-white/[0.04] px-2 py-2.5">
-                    <p className="text-sm font-semibold tabular-nums text-white">{DEMO.prestigeCount}</p>
+                    <p className="text-sm font-semibold tabular-nums text-white">{0}</p>
                     <p className="mt-0.5 text-[10px] uppercase tracking-wider text-white/30">Prestige</p>
                   </div>
                 </div>
@@ -184,13 +215,13 @@ export function TokenUtilityPage() {
               <Key className="h-3 w-3" /> Pack Printer
             </p>
             <p className="mt-2 text-3xl font-semibold tabular-nums text-white">
-              {isConnected ? `${DEMO.packKeys} keys` : "—"}
+              {isConnected ? `${0} keys` : "—"}
             </p>
             {isConnected ? (
               <>
                 <p className="mt-1 text-sm text-white/45">
                   {currentTier.keyIntervalHours > 0
-                    ? `1 key every ${currentTier.keyIntervalHours}h · next in ~${DEMO.nextKeyHours}h`
+                    ? `1 key every ${currentTier.keyIntervalHours}h · next in ~${0}h`
                     : "Reach Bronze to start printing"}
                 </p>
                 <div className="mt-4 space-y-1.5 text-xs">
@@ -284,7 +315,7 @@ export function TokenUtilityPage() {
             <div className="mt-5 grid grid-cols-2 gap-3">
               <div className="rounded-2xl bg-white/[0.04] p-4">
                 <p className="text-2xl font-semibold tabular-nums text-white">
-                  {DEMO.totalBurned.toLocaleString()}
+                  {Number(0).toLocaleString()}
                 </p>
                 <p className="mt-1 text-[11px] uppercase tracking-wider text-white/30">
                   PACKZ burned to date
@@ -313,7 +344,7 @@ export function TokenUtilityPage() {
             <div className="mt-5 grid grid-cols-2 gap-3">
               <div className="rounded-2xl bg-white/[0.04] p-4">
                 <p className="text-2xl font-semibold tabular-nums text-white">
-                  {formatCurrency(DEMO.rewardsVaultUsd)}
+                  {formatCurrency(0)}
                 </p>
                 <p className="mt-1 text-[11px] uppercase tracking-wider text-white/30">
                   Pack Rewards Vault
@@ -321,7 +352,7 @@ export function TokenUtilityPage() {
               </div>
               <div className="rounded-2xl bg-white/[0.04] p-4">
                 <p className="text-2xl font-semibold tabular-nums text-rh-green">
-                  {formatCurrency(DEMO.jackpotUsd)}
+                  {formatCurrency(jackpotUsd)}
                 </p>
                 <p className="mt-1 text-[11px] uppercase tracking-wider text-white/30">
                   Global Jackpot
@@ -368,7 +399,7 @@ export function TokenUtilityPage() {
             </p>
             <div className="mt-5 space-y-2">
               {LEVEL_UNLOCKS.map((unlock) => {
-                const unlocked = isConnected && DEMO.level >= unlock.level;
+                const unlocked = isConnected && level >= unlock.level;
                 return (
                   <div
                     key={unlock.level}
