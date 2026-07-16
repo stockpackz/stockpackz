@@ -4,9 +4,10 @@ import { robinhoodChain } from "@/lib/chain";
 
 export const dynamic = "force-dynamic";
 
-// Cash-backed base pot pledged by the team, paid on top of the on-chain
-// vault. Displayed total = base + live vault balance.
-const BASE_USD = 300;
+/**
+ * Jackpot display = on-chain jackpotBalance only.
+ * No off-chain "base pot" overlay — what you see is what's locked in the contract.
+ */
 
 const jackpotAbi = [
   {
@@ -20,28 +21,31 @@ const jackpotAbi = [
 
 export async function GET() {
   const core = process.env.NEXT_PUBLIC_STOCKPACKZ_ADDRESS as Hex | undefined;
-
-  let valueUsd = BASE_USD;
-  if (core) {
-    try {
-      const client = createPublicClient({
-        chain: robinhoodChain,
-        transport: http(robinhoodChain.rpcUrls.default.http[0]),
-      });
-      const balance = await client.readContract({
-        address: core,
-        abi: jackpotAbi,
-        functionName: "jackpotBalance",
-      });
-      valueUsd = BASE_USD + Number(balance) / 1e6;
-    } catch {
-      // RPC hiccup: fall back to the base pot rather than erroring the UI.
-    }
+  if (!core) {
+    return NextResponse.json({ valueUsd: 0, growthPerSec: 0, updatedAt: new Date().toISOString() });
   }
 
-  return NextResponse.json({
-    valueUsd,
-    growthPerSec: 0,
-    updatedAt: new Date().toISOString(),
-  });
+  try {
+    const client = createPublicClient({
+      chain: robinhoodChain,
+      transport: http(robinhoodChain.rpcUrls.default.http[0]),
+    });
+    const balance = await client.readContract({
+      address: core,
+      abi: jackpotAbi,
+      functionName: "jackpotBalance",
+    });
+    return NextResponse.json({
+      valueUsd: Number(balance) / 1e6,
+      growthPerSec: 0,
+      updatedAt: new Date().toISOString(),
+      source: "on-chain",
+      vault: core,
+    });
+  } catch {
+    return NextResponse.json(
+      { error: "Unable to read jackpotBalance", valueUsd: 0, growthPerSec: 0 },
+      { status: 502 }
+    );
+  }
 }

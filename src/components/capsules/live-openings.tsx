@@ -85,7 +85,7 @@ export function LiveOpenings() {
           />
           <div className="mt-8 flex gap-10">
             {[
-              { value: "$300", label: "Base jackpot" },
+              { value: "On-chain", label: "Jackpot vault" },
               { value: "5", label: "Curated packs" },
               { value: "14", label: "Tokenized stocks" },
             ].map((stat) => (

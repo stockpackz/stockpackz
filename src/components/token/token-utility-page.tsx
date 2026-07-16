@@ -24,7 +24,7 @@ export function TokenUtilityPage() {
   const [lifetimeXP, setLifetimeXP] = useState(0);
   const [seasonXP, setSeasonXP] = useState(0);
   const [level, setLevel] = useState(1);
-  const [jackpotUsd, setJackpotUsd] = useState(300);
+  const [jackpotUsd, setJackpotUsd] = useState(0);
 
   const { data: packzRaw } = useReadContract({
     address: PACKZ_ADDRESS,

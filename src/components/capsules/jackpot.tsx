@@ -11,7 +11,7 @@ function formatJackpot(value: number): string {
 }
 
 export function Jackpot() {
-  const [value, setValue] = useState(300);
+  const [value, setValue] = useState(0);
 
   useEffect(() => {
     async function sync() {
@@ -60,20 +60,11 @@ export function Jackpot() {
             vault.
           </p>
           <p className="mt-2 text-sm text-white/25">
-            $300 base pot from the team — every pack opened grows it, plus 100% of creator
-            rewards.
+            Locked in the smart contract — we can&apos;t withdraw it. Someone has to win it, or it
+            stays locked forever.
           </p>
           <p className="mt-1 text-xs text-white/20">
-            Verify vault top-ups on-chain:{" "}
-            <a
-              href="https://robinhoodchain.blockscout.com/address/0x6ee19E45EB7e72eb78225C930695cCf689ad065e"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline decoration-white/15 underline-offset-2 transition-colors hover:text-white/40"
-            >
-              rewards wallet
-            </a>{" "}
-            →{" "}
+            Verify the live vault on-chain:{" "}
             <a
               href="https://robinhoodchain.blockscout.com/address/0xeee1458ad6deb8fa35f39fddbb1aaa12d4a422f3"
               target="_blank"
@@ -82,6 +73,7 @@ export function Jackpot() {
             >
               jackpot vault
             </a>
+            . Every pack grows it; 1 in 25,000 wins 90%.
           </p>
         </BlurFade>
 
