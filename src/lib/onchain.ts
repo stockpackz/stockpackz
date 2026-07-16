@@ -333,8 +333,11 @@ export async function openPackOnchain(
   // 3. Nudge the keeper to fulfill randomness immediately.
   void fetch("/api/keeper", { method: "POST" }).catch(() => {});
 
-  // 4. Poll until settled (keeper + settlement usually < 10s).
-  const deadline = Date.now() + 90_000;
+  // 4. Poll until settled (keeper + settlement usually < 10s). Keep
+  //    re-nudging the keeper while waiting — a single dropped nudge must
+  //    never strand an opening.
+  const deadline = Date.now() + 120_000;
+  let pollCount = 0;
   for (;;) {
     if (Date.now() > deadline) {
       throw new OpeningError(
@@ -343,6 +346,9 @@ export async function openPackOnchain(
       );
     }
     await new Promise((r) => setTimeout(r, 1_800));
+    if (pollCount++ % 3 === 1) {
+      void fetch("/api/keeper", { method: "POST" }).catch(() => {});
+    }
 
     const opening = await readContract(wagmiConfig, {
       address: core,

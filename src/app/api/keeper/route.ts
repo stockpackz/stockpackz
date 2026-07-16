@@ -104,3 +104,8 @@ export async function POST() {
 
   return NextResponse.json({ fulfilled });
 }
+
+/** Vercel cron calls GET — same behavior as POST. */
+export async function GET() {
+  return POST();
+}
