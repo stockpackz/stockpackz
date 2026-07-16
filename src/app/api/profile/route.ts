@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createPublicClient, http, type Hex } from "viem";
+import { createPublicClient, getAddress, http, type Hex } from "viem";
 import { robinhoodChain } from "@/lib/chain";
 import { collections } from "@/lib/mock-data";
 import { TOKENIZED_STOCKS } from "@/lib/tokenized-stocks";
@@ -7,9 +7,9 @@ import { LEVEL_CURVE } from "@/lib/protocol";
 
 export const dynamic = "force-dynamic";
 
-const XP_MANAGER =
-  (process.env.NEXT_PUBLIC_XP_MANAGER_ADDRESS as Hex | undefined) ??
-  ("0xA67eeB87552238ea5E7FC976B0C77BB6c066eb78" as Hex);
+const XP_MANAGER = getAddress(
+  (process.env.NEXT_PUBLIC_XP_MANAGER_ADDRESS || "0xA67eeB87552238ea5E7FC976B0C77BB6c066eb78").trim()
+);
 
 const xpAbi = [
   {
@@ -80,7 +80,7 @@ export async function GET(request: Request) {
   let dailyStreak = 0;
 
   try {
-    const [life, lvl, profile] = await Promise.all([
+    const [life, lvl] = await Promise.all([
       client.readContract({
         address: XP_MANAGER,
         abi: xpAbi,
@@ -93,17 +93,22 @@ export async function GET(request: Request) {
         functionName: "levelOf",
         args: [address],
       }),
-      client.readContract({
+    ]);
+    lifetimeXP = Number(life);
+    level = Number(lvl);
+
+    try {
+      const profile = await client.readContract({
         address: XP_MANAGER,
         abi: xpAbi,
         functionName: "profiles",
         args: [address],
-      }),
-    ]);
-    lifetimeXP = Number(life);
-    level = Number(lvl);
-    seasonXP = Number(profile[1]);
-    dailyStreak = Number(profile[4]);
+      });
+      seasonXP = Number(profile[1]);
+      dailyStreak = Number(profile[4]);
+    } catch {
+      seasonXP = lifetimeXP;
+    }
   } catch {
     /* XP manager unreachable — return zeros */
   }
