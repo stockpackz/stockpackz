@@ -4,8 +4,9 @@ import { robinhoodChain } from "@/lib/chain";
 
 export const dynamic = "force-dynamic";
 
-// Base jackpot seed shown until the on-chain vault is funded/deployed.
-const BASE_USD = 500;
+// Cash-backed base pot pledged by the team, paid on top of the on-chain
+// vault. Displayed total = base + live vault balance.
+const BASE_USD = 300;
 
 const jackpotAbi = [
   {
@@ -32,9 +33,9 @@ export async function GET() {
         abi: jackpotAbi,
         functionName: "jackpotBalance",
       });
-      valueUsd = Number(balance) / 1e6;
+      valueUsd = BASE_USD + Number(balance) / 1e6;
     } catch {
-      // RPC hiccup: fall back to the seed rather than erroring the UI.
+      // RPC hiccup: fall back to the base pot rather than erroring the UI.
     }
   }
 

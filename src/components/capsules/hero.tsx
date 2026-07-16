@@ -69,7 +69,7 @@ export function Hero({ onOpenCapsule, walletReady }: HeroProps) {
               {[
                 { value: "14", label: "Tokenized stocks" },
                 { value: "5", label: "Curated packs" },
-                { value: "$500", label: "Jackpot seed" },
+                { value: "$300", label: "Base jackpot" },
               ].map((stat) => (
                 <div key={stat.label} className="text-center lg:text-left">
                   <p className="text-2xl font-bold tabular-nums tracking-tight text-white">

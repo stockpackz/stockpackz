@@ -11,7 +11,7 @@ function formatJackpot(value: number): string {
 }
 
 export function Jackpot() {
-  const [value, setValue] = useState(500);
+  const [value, setValue] = useState(300);
 
   useEffect(() => {
     async function sync() {
@@ -60,10 +60,11 @@ export function Jackpot() {
             vault.
           </p>
           <p className="mt-2 text-sm text-white/25">
-            Every pack opened makes it grow — plus 100% of creator rewards.
+            $300 base pot from the team — every pack opened grows it, plus 100% of creator
+            rewards.
           </p>
           <p className="mt-1 text-xs text-white/20">
-            Verify every top-up on-chain:{" "}
+            Verify vault top-ups on-chain:{" "}
             <a
               href="https://robinhoodchain.blockscout.com/address/0x6ee19E45EB7e72eb78225C930695cCf689ad065e"
               target="_blank"

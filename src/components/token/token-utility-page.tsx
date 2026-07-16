@@ -31,7 +31,7 @@ const DEMO = {
   nextKeyHours: 0,
   totalBurned: 0,
   rewardsVaultUsd: 0,
-  jackpotUsd: 500,
+  jackpotUsd: 300,
 };
 
 export function TokenUtilityPage() {
