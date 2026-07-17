@@ -17,6 +17,9 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://stockpackz.xyz"),
   title: "StockPackz | Robinhood Chain",
   description: "Open packs. Own tokenized stocks on Robinhood Chain.",
+  verification: {
+    google: "CPI2OLleSPKyC8Rz_RAYrHXWm3ymnPWZEopZgMjuAlk",
+  },
   icons: {
     // Solid dark icons — transparent PNGs render as unpredictable shapes in
     // tabs, home screens, and pinned sites.
