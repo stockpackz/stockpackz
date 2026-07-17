@@ -74,6 +74,13 @@ export default function StockpackzPage() {
             Every StockPack purchases real tokenized equities on Robinhood Chain through Uniswap
             v4. No inventory. No IOUs. Every opening settles directly into your wallet.
           </p>
+          <p className="mx-auto mt-6 max-w-2xl text-center text-xs leading-relaxed text-white/25">
+            StockPackz is an independent, community-built application deployed on Robinhood Chain
+            (chain ID 4663). It is not affiliated with, endorsed by, sponsored by, or operated by
+            Robinhood Markets, Inc. or any of its subsidiaries. &ldquo;Robinhood&rdquo; is a
+            trademark of its respective owner and is referenced here only to identify the public
+            blockchain network. Trading tokenized assets involves risk, including loss of principal.
+          </p>
           <div className="mt-12 flex flex-col items-center justify-between gap-6 sm:flex-row">
             <StockpackzLogo variant="wordmark" href="/" className="h-5 w-auto opacity-60" />
             <p className="text-xs text-white/25">

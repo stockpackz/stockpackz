@@ -14,6 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://stockpackz.xyz"),
   title: "StockPackz | Robinhood Chain",
   description: "Open packs. Own tokenized stocks on Robinhood Chain.",
   icons: {
