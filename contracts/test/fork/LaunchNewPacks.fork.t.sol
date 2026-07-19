@@ -41,8 +41,12 @@ contract LaunchNewPacksFork is Test {
     address constant INTC = 0xc72b96e0E48ecd4DC75E1e45396e26300BC39681;
 
     address user = makeAddr("stress-user");
+    bool forked;
 
     function setUp() public {
+        // Skip cleanly when run without --fork-url (e.g. plain `forge test` in CI).
+        forked = address(core).code.length > 0;
+        if (!forked) return;
         _wirePairs();
         deal(USDG, user, 10_000e6);
         vm.prank(user);
@@ -108,6 +112,7 @@ contract LaunchNewPacksFork is Test {
 
     /// Every candidate stock must settle a REAL swap at Mag7 pack size.
     function test_everyCandidateSettlesRealSwap() public {
+        vm.skip(!forked);
         address[9] memory tokens = [AAPL, MSFT, AMZN, META, TSLA, GOOGL, SPY, QQQ, INTC];
         string[9] memory names = ["AAPL", "MSFT", "AMZN", "META", "TSLA", "GOOGL", "SPY", "QQQ", "INTC"];
 
@@ -142,6 +147,7 @@ contract LaunchNewPacksFork is Test {
     /// Create the REAL packs we intend to launch and hammer them with
     /// repeated openings — random stock selection across all options.
     function test_launchPacks_stress() public {
+        vm.skip(!forked);
         (uint256 mag7Id, uint256 indexId) = _createLaunchPacks();
 
         uint256 settled;
