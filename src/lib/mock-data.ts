@@ -21,17 +21,23 @@ export const capsuleTypes: CapsuleType[] = [
   },
   {
     id: "mag7",
-    name: "Magnificent Seven",
-    description: "The titans that move markets",
+    name: "Magnificent 7",
+    description: "The seven giants that move the market",
     price: 14.99,
     assetCount: 7,
     stocks: [t("aapl"), t("msft"), t("amzn"), t("meta"), t("tsla"), t("googl"), t("nvda")],
     artwork: { primary: "#0D0D0D", secondary: "#141414", accent: "#C8C8CE" },
     rarityPreview: ["rare", "epic", "legendary"],
-    // MSFT has no in-range USDG liquidity on-chain yet.
-    comingSoon: true,
-    comingSoonReason:
-      "MSFT is tokenized on Robinhood Chain but its Uniswap pool doesn't have enough liquidity to buy yet. This pack opens the moment it does.",
+  },
+  {
+    id: "index",
+    name: "Index Pack",
+    description: "Own the whole market: S&P 500 & Nasdaq 100",
+    price: 9.99,
+    assetCount: 2,
+    stocks: [t("spy"), t("qqq")],
+    artwork: { primary: "#0A0F0A", secondary: "#101710", accent: "#4ADE80" },
+    rarityPreview: ["common", "rare"],
   },
   {
     id: "dividend",

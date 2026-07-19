@@ -2,6 +2,7 @@
 export const CAPSULE_ARTWORK: Record<string, string> = {
   ai: "/graphics/capsule-ai-v5.png",
   mag7: "/graphics/capsule-mag7-v5.png",
+  index: "/graphics/capsule-index-v5.png",
   dividend: "/graphics/capsule-dividend-v5.png",
   healthcare: "/graphics/capsule-healthcare-v5.png",
   "future-tech": "/graphics/capsule-future-tech-v5.png",

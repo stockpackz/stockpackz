@@ -36,12 +36,16 @@ export const XP_MANAGER_ADDRESS = (process.env.NEXT_PUBLIC_XP_MANAGER_ADDRESS ??
 export const ONCHAIN_PACK_IDS: Record<string, bigint> = {
   ai: 1n,
   "future-tech": 2n,
+  mag7: 3n,
+  index: 4n,
 };
 
 /** XP awarded per on-chain pack (mirrors pack.baseXP). */
 export const ONCHAIN_PACK_XP: Record<string, number> = {
   ai: 100,
   "future-tech": 250,
+  mag7: 300,
+  index: 100,
 };
 
 export function isOnchainPack(capsuleId: string): boolean {
