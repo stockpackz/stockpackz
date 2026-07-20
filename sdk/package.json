@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "typescript": "^5.6.0",
-    "viem": "^2.21.0"
+    "viem": "^2.55.4"
   },
   "keywords": ["stockpackz", "robinhood-chain", "tokenized-stocks", "uniswap-v4"],
   "repository": {
